@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
                 <ul className="space-y-3">
                     <li><a href="#home" className="text-gray-400 hover:text-emerald-400 transition-colors">Home</a></li>
                     <li><a href="#services" className="text-gray-400 hover:text-emerald-400 transition-colors">Services</a></li>
-                    <li><a href="#diet" className="text-gray-400 hover:text-emerald-400 transition-colors">Diet Plan</a></li>
+                    <li><a href="#tools" className="text-gray-400 hover:text-emerald-400 transition-colors">Diet Plan</a></li>
                     <li><a href="#bmicalculator" className="text-gray-400 hover:text-emerald-400 transition-colors">BMI Check</a></li>
                     <li><a href="#store" className="text-gray-400 hover:text-emerald-400 transition-colors">Store</a></li>
                 </ul>

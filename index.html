@@ -2,8 +2,105 @@
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function () {
+        var isExtensionFetchError = function (msg, filename, stack) {
+          var text = String(msg || '') + ' ' + String(stack || '');
+          var src = String(filename || '') + ' ' + String(stack || '');
+          if (
+            src.indexOf('chrome-extension://') !== -1 ||
+            src.indexOf('moz-extension://') !== -1 ||
+            src.indexOf('safari-web-extension://') !== -1
+          ) {
+            return true;
+          }
+          return text.indexOf('Cannot set property fetch') !== -1;
+        };
+
+        window.addEventListener(
+          'error',
+          function (event) {
+            var errStack = event && event.error && event.error.stack;
+            if (isExtensionFetchError(event.message, event.filename, errStack)) {
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              return false;
+            }
+          },
+          true
+        );
+
+        window.addEventListener(
+          'unhandledrejection',
+          function (event) {
+            var reason = event && event.reason;
+            var msg = reason && (reason.message || String(reason));
+            var stack = reason && reason.stack;
+            if (isExtensionFetchError(msg, '', stack)) {
+              event.preventDefault();
+              event.stopImmediatePropagation();
+            }
+          },
+          true
+        );
+
+        try {
+          var nativeFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : undefined;
+          if (!nativeFetch) return;
+          var currentFetch = nativeFetch;
+
+          var patchTarget = function (target) {
+            if (!target) return false;
+            var desc = Object.getOwnPropertyDescriptor(target, 'fetch');
+            if (!desc) return false;
+            if (desc.writable || typeof desc.set === 'function') return true;
+            if (desc.configurable === false) return false;
+            Object.defineProperty(target, 'fetch', {
+              configurable: true,
+              enumerable: desc.enumerable !== false,
+              get: function () {
+                return currentFetch;
+              },
+              set: function (fn) {
+                if (typeof fn === 'function') {
+                  currentFetch = fn;
+                }
+              }
+            });
+            return true;
+          };
+
+          var patchedOwn = patchTarget(window);
+          var proto = Object.getPrototypeOf(window);
+          var patchedProto = patchTarget(proto);
+          if (!patchedOwn && !patchedProto && typeof Window !== 'undefined') {
+            patchTarget(Window.prototype);
+          }
+          if (!Object.getOwnPropertyDescriptor(window, 'fetch')) {
+            Object.defineProperty(window, 'fetch', {
+              configurable: true,
+              enumerable: true,
+              get: function () {
+                return currentFetch;
+              },
+              set: function (fn) {
+                if (typeof fn === 'function') {
+                  currentFetch = fn;
+                }
+              }
+            });
+          }
+        } catch (_err) {
+          // Safely ignore non-configurable host descriptors
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Saroj Fitness & Ayurveda Guide</title>
+    <title>Saroj Fitness &amp; Ayurveda Guide</title>
+    <meta name="description" content="A comprehensive fitness application featuring AI Diet Planning, BMI Calculation, and an Ayurvedic Store, designed with a premium glassmorphism aesthetic." />
+    <meta property="og:title" content="Saroj Fitness &amp; Ayurveda Guide" />
+    <meta property="og:description" content="A comprehensive fitness application featuring AI Diet Planning, BMI Calculation, and an Ayurvedic Store, designed with a premium glassmorphism aesthetic." />
+    <meta property="og:type" content="website" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
